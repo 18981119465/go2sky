@@ -15,20 +15,33 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package http
+package go2sky
 
 import (
-	"log"
-
-	"github.com/SkyAPM/go2sky"
-	"github.com/go-resty/resty/v2"
+	"testing"
 )
 
-// NewGoResty returns a resty Client with tracer
-func NewGoResty(tracer *go2sky.Tracer, options ...ClientOption) *resty.Client {
-	hc, err := NewClient(tracer, options...)
-	if err != nil {
-		log.Fatalf("create client error %v \n", err)
+func TestConstSampler_IsSampled(t *testing.T) {
+	sampler := NewConstSampler(true)
+	operationName := "op"
+	sampled := sampler.IsSampled(operationName)
+	if sampled != true {
+		t.Errorf("const sampler should be sampled")
 	}
-	return resty.NewWithClient(hc)
+	samplerNegative := NewConstSampler(false)
+	sampledNegative := samplerNegative.IsSampled(operationName)
+	if sampledNegative != false {
+		t.Errorf("const sampler should not be sampled")
+	}
+}
+
+func TestRandomSampler_IsSampled(t *testing.T) {
+	randomSampler := NewRandomSampler(0.5)
+	//just for test case
+	randomSampler.threshold = 100
+	operationName := "op"
+	sampled := randomSampler.IsSampled(operationName)
+	if sampled != true {
+		t.Errorf("const sampler should be sampled")
+	}
 }
